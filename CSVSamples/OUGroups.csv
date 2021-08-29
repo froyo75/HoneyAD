@@ -1,0 +1,8 @@
+objectType,domain,name,displayName,description,SamAccountName,ou
+ou,test.local,Server Management,Server Management,Server Management,,"DC=test,DC=local"
+ou,test.local,Infrastructure Servers Tier-0,Infrastructure Servers Tier-0,Infrastructure Servers Tier-0,,"OU=Server Management,DC=test,DC=local"
+ou,test.local,Groups,Groups,Groups,,"OU=Infrastructure Servers Tier-0,OU=Server Management,DC=test,DC=local"
+ou,test.local,Domain Server Admins,Domain Server Admins,Domain Server Admins,,"DC=test,DC=local"
+group,test.local,FR PARIS IDF PAR1PA001 Administrators,FR PARIS IDF PAR1PA001 Administrators,FR PARIS IDF PAR1PA001 Administrators,FR PARIS IDF PAR1PA001 Administrators,"OU=Groups,OU=Infrastructure Servers Tier-0,OU=Server Management,DC=test,DC=local"
+group,test.local,FR PARIS IDF PAR1PA001 Power Users,FR PARIS IDF PAR1PA001 Power Users,FR PARIS IDF PAR1PA001 Power Users,FR PARIS IDF PAR1PA001 Power Users,"OU=Groups,OU=Infrastructure Servers Tier-0,OU=Server Management,DC=test,DC=local"
+group,test.local,FR PARIS IDF PAR1PAD02 Administrators,FR PARIS IDF PAR1PAD02 Administrators,FR PARIS IDF PAR1PAD02 Administrators,FR PARIS IDF PAR1PAD02 Administrators,"OU=Groups,OU=Infrastructure Servers Tier-0,OU=Server Management,DC=test,DC=local"

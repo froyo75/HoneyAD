@@ -1,0 +1,3 @@
+domain,sourceSamAccountName,sourceObjectType,targetSamAccountName,targetObjectType,adRight,accessType,securityInheritance
+test.local,toto,user,PARIS001$,computer,GenericAll,Allow,All
+test.local,tata,user,PARIS001$,computer,WriteOwner,Allow,All
