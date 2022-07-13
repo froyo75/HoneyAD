@@ -23,7 +23,6 @@
 
 #$ErrorActionPreference = 'SilentlyContinue'
 $PassCharset = 'ABCDEFGHKLMNOPRSTUVWXYZabcdefghiklmnoprstuvwxyz1234567890!-$%&/()=?}][{@#*+'
-$defaultPDC = (Get-ADDomain).pdcEmulator
 
 function Get-DateTime() {
     return $(Get-Date -UFormat '%m/%d/%Y %T')
@@ -205,14 +204,14 @@ function UpdateHoneyUsersOrComputersPwd
         [string]$CSVFile,
 
         [Parameter(Mandatory=$false,
-                   HelpMessage="Specify the CSV delimiter (Default=',').")]
+                HelpMessage="Specify the CSV delimiter (Default=',').")]
         [ValidateNotNullOrEmpty()]
         [string]$CSVDelimiter = ',',
 
         [Parameter(Mandatory=$false,
-                   HelpMessage="Specify the domain controller to use (Default => The default primary domain controller).")]
+                    HelpMessage="Specify the domain controller to use (Default => The default primary domain controller).")]
         [ValidateNotNullOrEmpty()]
-        [string]$Server = $defaultPDC,
+        [string]$Server = (Get-ADDomain).pdcEmulator,
 
         [Parameter(Mandatory=$true,
                    HelpMessage="Specify the Active Directory object type (user or computer).")]

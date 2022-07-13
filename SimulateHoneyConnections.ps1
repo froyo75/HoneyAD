@@ -20,13 +20,12 @@
         - 1.6 Fix login issue with domain users
         - 1.7 Checks if the 'badPwdCount' attribute exists before simulating bad login attempts
 .EXAMPLE
-    C:\PS> SimulateHoneyConnections -CSVDelimiter ';' -CSVFile C:\Users\Administrator\Desktop\UsersServices.csv -ObjectType user
-    C:\PS> SimulateHoneyConnections -CSVDelimiter ';' -CSVFile C:\Users\Administrator\Desktop\UsersServices.csv -ObjectType user -MaxBadPwdCount 2
-    C:\PS> SimulateHoneyConnections -CSVDelimiter ';' -CSVFile C:\Users\Administrator\Desktop\RS\Computers.csv -ObjectType computer -MaxBadPwdCount 2
+    C:\PS> SimulateHoneyConnections -CSVFile C:\Users\Administrator\Desktop\UsersServices.csv -ObjectType user
+    C:\PS> SimulateHoneyConnections -CSVFile C:\Users\Administrator\Desktop\UsersServices.csv -ObjectType user -MaxBadPwdCount 2
+    C:\PS> SimulateHoneyConnections -CSVFile C:\Users\Administrator\Desktop\RS\Computers.csv -ObjectType computer -MaxBadPwdCount 2
 #>
 
 $BadPassword = "B@dP@ssw0rd"
-$defaultPDC = (Get-ADDomain).pdcEmulator
 
 function Get-DateTime() {
     return $(Get-Date -UFormat '%m/%d/%Y %T')
@@ -111,7 +110,7 @@ function SimulateHoneyConnections
         [string]$CSVFile,
 
         [Parameter(Mandatory=$false,
-                   HelpMessage="Specify the CSV delimiter (Default=',').")]
+                HelpMessage="Specify the CSV delimiter (Default=',').")]
         [ValidateNotNullOrEmpty()]
         [string]$CSVDelimiter = ',',
 
@@ -132,9 +131,9 @@ function SimulateHoneyConnections
         [string]$SMBFolderName = "SYSVOL",
 
         [Parameter(Mandatory=$false,
-                   HelpMessage="Specify the domain controller to use (Default => The default primary domain controller).")]
+                HelpMessage="Specify the domain controller to use (Default => The default primary domain controller).")]
         [ValidateNotNullOrEmpty()]
-        [string]$Server = $defaultPDC,
+        [string]$Server = (Get-ADDomain).pdcEmulator,
         
         [Parameter(Mandatory=$false,
                    HelpMessage="Specify the log path for logging messages (Default=<Current Working Directory>).")]

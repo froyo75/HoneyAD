@@ -12,7 +12,7 @@
         - To add a domain user to one or more Active Directory groups within the "memberOf" attribute (default list separator '|' -> can be changed through the "$memberOfSeparator" variable)
         - Specific ACLs can also be set to change the security descriptor of a specified AD user, group or computer object.
 .NOTES
-    Version:        2.2
+    Version:        2.3
     Author:         @froyo75
     Creation Date:  10/09/2020
     Purpose/Change: 
@@ -29,6 +29,7 @@
         - 2.0 Fix 'doesNotRequirePreAuth' attribute support for user objects
         - 2.1 Fix 'OU' creation/deletion issues
         - 2.2 Add/Fix 'Domain/Server' support
+        - 2.3 Fix issues when displaying SPNs in log Messages
 .EXAMPLE
     #To create all Active Directory objects specified within the CSV
     C:\PS> GenerateHoneyObjects -CSVDelimiter ';' -CSVFileOUGroups  C:\Users\Administrator\Desktop\RS\OUGroups.csv
@@ -50,7 +51,6 @@
 #>
 
 $memberOfSeparator = '|'
-$defaultPDC = (Get-ADDomain).pdcEmulator
 
 function Get-DateTime() {
     return $(Get-Date -UFormat "%m/%d/%Y %T")
@@ -74,13 +74,14 @@ function Logging([string]$Message, [string]$Color, [string]$LogFile, [bool]$Writ
     }
 }
 
-function Check-ADUserOrComputerSPN([object]$SamAccountName, [string]$Domain) {
+function Check-ADUserOrComputerSPN([object]$ADObject, [string]$Domain) {
     Try {
-        $SPNS = $ADObject.servicePrincipalName | Out-String
-        $SPNList = ($SPNS.Replace("`n","','")).TrimEnd(",'")
+        $SamAccountName = $ADObject.SamAccountName
+        $SPNS = $ADObject.ServicePrincipalNames
+        $SPNList = ($SPNS | % { "'$_'" } | out-string).Replace("`n",",").TrimEnd(',')
         $Exist = [bool]$SPNS
         if ($Exist) {
-            $Message = "[*] $(Get-DateTime): The following SPN(s) '$SPNList' are set for the domain object '$Domain\$SamAccountName'"
+            $Message = "[*] $(Get-DateTime): The following SPN(s) {$SPNList} are set for the domain object '$Domain\$SamAccountName'"
             Logging -Message $Message -Color "Magenta" -LogFile $Logfile -WriteToLog $WriteToLog -DisplayMessage $DisplayMessage
         }
         return $Exist
@@ -360,13 +361,13 @@ function Set-ADSPNUserOrComputer([object]$ADObject, [string]$Server, [string]$Do
                 } elseif ($ObjectType -like "computer") {
                     $CMD = "Set-ADComputer -Server $Server -Identity $SamAccountName"
                 }
-                $ExistSPN = Check-ADUserOrComputerSPN -Server $Server -SamAccountName $SamAccountName
+                $ExistSPN = Check-ADUserOrComputerSPN -ADObject $ADObject -Domain $Domain
                 if (-Not $ExistSPN) {
-                    $Message = "[+] $(Get-DateTime): Creating the following SPN(s) $SPN for the domain $ObjectType '$Domain\$SamAccountName'"
+                    $Message = "[+] $(Get-DateTime): Creating the following SPN(s) {$SPN} for the domain $ObjectType '$Domain\$SamAccountName'"
                     Logging -Message $Message -Color "green" -LogFile $Logfile -WriteToLog $WriteToLog -DisplayMessage $DisplayMessage
                     iex("$CMD -ServicePrincipalNames @{Add=$SPN}")
                 } elseif ($ExistSPN -and $Update) {
-                    $Message = "[+] $(Get-DateTime): Updating the following SPN(s) $SPN for the domain $ObjectType '$Domain\$SamAccountName'"
+                    $Message = "[+] $(Get-DateTime): Updating the following SPN(s) {$SPN} for the domain $ObjectType '$Domain\$SamAccountName'"
                     Logging -Message $Message -Color "green" -LogFile $Logfile -WriteToLog $WriteToLog -DisplayMessage $DisplayMessage
                     iex("$CMD -ServicePrincipalNames @{Replace=$SPN}")
                 }
@@ -548,14 +549,14 @@ function GenerateHoneyObjects
         [string]$CSVFileComputers,
 
         [Parameter(Mandatory=$false,
-                   HelpMessage="Specify the domain controller to use (Default => The default primary domain controller).")]
-        [ValidateNotNullOrEmpty()]
-        [string]$Server = $defaultPDC,
-
-        [Parameter(Mandatory=$false,
                    HelpMessage="Specify the input CSV file for setting/or updating the security descriptor of a specified object.")]
         [ValidateNotNullOrEmpty()]
         [string]$CSVFileACLS,
+
+        [Parameter(Mandatory=$false,
+                HelpMessage="Specify the domain controller to use (Default => The default primary domain controller).")]
+        [ValidateNotNullOrEmpty()]
+        [string]$Server = (Get-ADDomain).pdcEmulator,
 
         [Parameter(Mandatory=$false,
                    HelpMessage="Specify the CSV delimiter (Default=',').")]
@@ -563,7 +564,7 @@ function GenerateHoneyObjects
         [string]$CSVDelimiter = ',',
 
         [Parameter(Mandatory=$false,
-                   HelpMessage="Whether to force updating all Active Directory objects specified within the CSV (Default=False).")]
+                   HelpMessage="Whether to force writing output messages to log file (Default=False).")]
         [ValidateNotNullOrEmpty()]
         [ValidateSet($false,$true)]
         [bool]$Update = $false,

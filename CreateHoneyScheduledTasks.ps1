@@ -65,14 +65,14 @@ function Create-NewScheduledTask([string]$TaskName, [string]$Description, [strin
 
 #Create a new scheduled task for updating HoneyUsersServices' password automatically
 $TaskName = "Update HoneyUsersServices password"
-$Description = "Update the HoneyUsersServices' password automatically "
+$Description = "Update the HoneyUsersServices' password automatically"
 $Action = ". C:\Users\Administrator\Desktop\RS\UpdateHoneyUsersOrComputersPwd.ps1;UpdateHoneyUsersOrComputersPwd -CSVFile C:\Users\Administrator\Desktop\RS\UsersServices.csv -ObjectType user -PassLength 40 -Delay 5"
 $Trigger =  "-Daily -At 9am"
 Create-NewScheduledTask -TaskName $TaskName -Description $Description -Action $Action -TriggerArgs $Trigger
 
 #Create a new scheduled task for updating HoneyComputers' password automatically
 $TaskName = "Update HoneyComputers password"
-$Description = "Update the HoneyComputers' password automatically "
+$Description = "Update the HoneyComputers' password automatically"
 $Action = ". C:\Users\Administrator\Desktop\RS\UpdateHoneyUsersOrComputersPwd.ps1;UpdateHoneyUsersOrComputersPwd -CSVFile C:\Users\Administrator\Desktop\RS\Computers.csv -ObjectType computer -PassLength 40 -Delay 5"
 $Trigger =  "-Daily -At 5am"
 Create-NewScheduledTask -TaskName $TaskName -Description $Description -Action $Action -TriggerArgs $Trigger
